@@ -59,7 +59,7 @@ class PageViewController: UIViewController, Territory {
         pageViewController!.didMove(toParentViewController: self)
     }
     
-    func addTerritory(_ value: (String, String)) {
+    func addTerritory(withNameAndKey value: (String, String)) {
         territoryArray.append(value)
     }
     
@@ -72,5 +72,5 @@ class PageViewController: UIViewController, Territory {
 }
 
 protocol Territory {
-    func addTerritory(_ value: (String, String))
+    func addTerritory(withNameAndKey value: (String, String))
 }

@@ -117,7 +117,7 @@ extension CityChoiceViewController {
             do {
                 let city = try JSONDecoder().decode([CityNameAndKey].self, from: data)
                 guard let cityName = city[0].name, let cityKey = city[0].key else { return }
-                self.delegate?.addTerritory((cityName, cityKey))
+                self.delegate?.addTerritory(withNameAndKey: (cityName, cityKey))
                 self.dismiss(animated: false, completion: nil)
             } catch { print("It`s an error here") }
         }).resume()
