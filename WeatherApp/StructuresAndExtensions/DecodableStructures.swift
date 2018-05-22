@@ -9,21 +9,8 @@
 import Foundation
 
 struct City: Decodable {
-    let info : CityNameAndKey?
-    
-    private enum Key: String, CodingKey {
-        case info = "ParentCity"
-    }
-    
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: Key.self)
-        self.info = try container.decode(CityNameAndKey.self, forKey: .info)
-    }
-}
-
-struct CityNameAndKey: Decodable {
-    let name : String?
-    let key : String?
+    let name : String
+    let key : String
     
     private enum Key: String, CodingKey {
         case name = "EnglishName"

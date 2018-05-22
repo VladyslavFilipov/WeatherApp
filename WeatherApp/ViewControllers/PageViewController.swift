@@ -9,27 +9,31 @@
 import UIKit
 import CoreLocation
 
-class PageViewController: UIViewController, Territory {
+class PageViewController: UIViewController, Territory, Forecast {
 
     @IBOutlet weak var pageControl: UIPageControl!
     
-    let apiKey = "OI2gyTjifTOzaSBtMJyk4iFUKVPmu6L5"
+    let apiKey = "KAwlbrGFXgnsAHhyhtCYT2OWEZuoAeO1"
     
-    var locationManager:CLLocationManager!
-    var userLocation = CLLocation()
+    let location = Geolocation()
+    let daily = DailyWeather()
+    
     var pageViewController: UIPageViewController?
     var pendingIndex: Int?
-    var territoryArray = [(String, String)]() {
+    var territoryArray = [TerritoryInfo]() {
+        didSet { DispatchQueue.main.async { self.pageControl.numberOfPages = self.territoryArray.count } }
+    }
+    var weather = (byDay: [WeatherByDay](), byHour: [[WeatherByHour]]()) {
         didSet { DispatchQueue.main.async {
-            self.pageControl.numberOfPages = self.territoryArray.count
-            self.createPageViewController()
-            }
-        }
+            if self.weather.byDay.count == self.weather.byHour.count { self.createPageViewController()} } }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        determineMyCurrentLocation()
+        location.forecastDelegate = self
+        location.locationDelegate = self
+        location.apiKey = apiKey
+        location.determineMyCurrentLocation()
     }
     
     func getWeatherViewController(withIndex index: Int) -> WeatherViewController? {
@@ -38,16 +42,18 @@ class PageViewController: UIViewController, Territory {
             weatherVC?.itemIndex = index
             weatherVC?.apiKey = apiKey
             weatherVC?.territoryNameAndKey = territoryArray[index]
+            weatherVC?.weatherArrayByDay = weather.byDay[index].forecast
+            weatherVC?.weatherArrayByHour = weather.byHour[index]
             pageControl.currentPage = index
             return weatherVC
         }
         return nil
     }
     
-    func createPageViewController() {
+    private func createPageViewController() {
         let pageVC = self.storyboard?.instantiateViewController(withIdentifier: "pageVC") as? UIPageViewController
         pageVC?.dataSource = self
-        pageVC?.delegate = self
+//        pageVC?.delegate = self
         if territoryArray.count > 0 {
             guard let controller = getWeatherViewController(withIndex: territoryArray.count - 1) else { return }
             let controllers = [controller]
@@ -59,18 +65,46 @@ class PageViewController: UIViewController, Territory {
         pageViewController!.didMove(toParentViewController: self)
     }
     
-    func addTerritory(withNameAndKey value: (String, String)) {
+    func addLocation(withNameAndKey value: TerritoryInfo) {
+        if territoryArray.count == 0 { territoryArray.append(value) }
+        else { territoryArray[0] = value }
+    }
+    
+    func addTerritory(withNameAndKey value: TerritoryInfo) {
         territoryArray.append(value)
     }
     
+    func addHourlyForecast(value: [WeatherByHour], city: TerritoryInfo) {
+        guard let index = territoryArray.index(of: city) else { return }
+        if index == weather.byHour.count { weather.byHour.append(value) }
+        else { weather.byHour[index] = value }
+    }
+    
+    func addDailyForecast(value: WeatherByDay, city: TerritoryInfo) {
+        guard let index = territoryArray.index(of: city) else { return }
+        if index == weather.byDay.count { weather.byDay.append(value) }
+        else { weather.byDay[index] = value }
+    }
+    
     @IBAction func addCity(_ sender: Any) {
+        cityVCPresent()
+    }
+    
+    private func cityVCPresent() {
         let cityVC = self.storyboard?.instantiateViewController(withIdentifier: "cityVC") as? CityChoiceViewController
-        cityVC?.delegate = self
+        cityVC?.territoryDelegate = self
+        cityVC?.forecastDelegate = self
         cityVC?.apiKey = apiKey
-        present(cityVC!, animated: true, completion: nil)
+        self.present(cityVC!, animated: true, completion: nil)
     }
 }
 
 protocol Territory {
-    func addTerritory(withNameAndKey value: (String, String))
+    func addTerritory(withNameAndKey value: TerritoryInfo)
+    func addLocation(withNameAndKey value: TerritoryInfo)
+}
+
+protocol Forecast {
+    func addHourlyForecast(value: [WeatherByHour], city: TerritoryInfo)
+    func addDailyForecast(value: WeatherByDay, city: TerritoryInfo)
 }

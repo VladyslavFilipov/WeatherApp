@@ -44,6 +44,7 @@
                                 </connections>
                             </button>
                         </subviews>
+                        <color key="backgroundColor" name="alternateSelectedControlColor" catalog="System" colorSpace="catalog"/>
                         <constraints>
                             <constraint firstItem="mf9-Nc-SDF" firstAttribute="trailing" secondItem="Jjg-yI-BYI" secondAttribute="trailing" id="D47-EX-0IT"/>
                             <constraint firstItem="Jjg-yI-BYI" firstAttribute="trailing" secondItem="1hO-ve-lTx" secondAttribute="trailing" priority="750" constant="328" id="VHw-D5-1Ur"/>
@@ -70,36 +71,38 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter the city" textAlignment="natural" clearsOnBeginEditing="YES" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="hK7-Q7-pxT">
-                                <rect key="frame" x="16" y="172" width="343" height="40"/>
-                                <nil key="textColor"/>
-                                <fontDescription key="fontDescription" name="HelveticaNeue-Thin" family="Helvetica Neue" pointSize="30"/>
-                                <textInputTraits key="textInputTraits" autocapitalizationType="words" autocorrectionType="yes" enablesReturnKeyAutomatically="YES" textContentType="address-level2"/>
-                            </textField>
-                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="uvb-Mz-Zyn">
-                                <rect key="frame" x="0.0" y="623" width="375" height="44"/>
+                            <navigationBar contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="eGK-rv-Di9">
+                                <rect key="frame" x="0.0" y="20" width="375" height="44"/>
                                 <items>
-                                    <barButtonItem systemItem="done" id="zGE-S5-51T">
-                                        <connections>
-                                            <action selector="doneButtonPressed:" destination="voG-Oy-Jaz" id="Oje-LT-hUS"/>
-                                        </connections>
-                                    </barButtonItem>
+                                    <navigationItem title="City Choose" id="IZb-SQ-PNe">
+                                        <barButtonItem key="leftBarButtonItem" systemItem="done" id="zGE-S5-51T">
+                                            <connections>
+                                                <action selector="doneButtonPressed:" destination="voG-Oy-Jaz" id="Oje-LT-hUS"/>
+                                            </connections>
+                                        </barButtonItem>
+                                    </navigationItem>
                                 </items>
-                            </toolbar>
+                            </navigationBar>
+                            <textField opaque="NO" multipleTouchEnabled="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Enter the city" textAlignment="natural" clearsOnBeginEditing="YES" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="saL-o2-5yw">
+                                <rect key="frame" x="16" y="195" width="343" height="36"/>
+                                <nil key="textColor"/>
+                                <fontDescription key="fontDescription" name="HelveticaNeue-Thin" family="Helvetica Neue" pointSize="27"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="words" autocorrectionType="yes" enablesReturnKeyAutomatically="YES" smartDashesType="yes" textContentType="address-level2"/>
+                            </textField>
                         </subviews>
                         <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="hK7-Q7-pxT" firstAttribute="top" secondItem="r5f-Ou-c3F" secondAttribute="top" constant="152" id="FFg-2X-jby"/>
-                            <constraint firstItem="hK7-Q7-pxT" firstAttribute="leading" secondItem="r5f-Ou-c3F" secondAttribute="leading" constant="16" id="T7p-jf-5fj"/>
-                            <constraint firstItem="r5f-Ou-c3F" firstAttribute="trailing" secondItem="hK7-Q7-pxT" secondAttribute="trailing" constant="16" id="fjD-oV-gmE"/>
-                            <constraint firstItem="uvb-Mz-Zyn" firstAttribute="trailing" secondItem="r5f-Ou-c3F" secondAttribute="trailing" id="m8O-9g-MpG"/>
-                            <constraint firstItem="uvb-Mz-Zyn" firstAttribute="leading" secondItem="r5f-Ou-c3F" secondAttribute="leading" id="qQ3-rd-hDe"/>
-                            <constraint firstItem="uvb-Mz-Zyn" firstAttribute="bottom" secondItem="r5f-Ou-c3F" secondAttribute="bottom" id="v94-dd-xgZ"/>
+                            <constraint firstItem="eGK-rv-Di9" firstAttribute="leading" secondItem="r5f-Ou-c3F" secondAttribute="leading" id="0DY-LI-rz2"/>
+                            <constraint firstItem="saL-o2-5yw" firstAttribute="leading" secondItem="r5f-Ou-c3F" secondAttribute="leading" constant="16" id="9lJ-Dw-udP"/>
+                            <constraint firstItem="r5f-Ou-c3F" firstAttribute="trailing" secondItem="saL-o2-5yw" secondAttribute="trailing" constant="16" id="Fzn-ju-dBz"/>
+                            <constraint firstItem="saL-o2-5yw" firstAttribute="top" secondItem="eGK-rv-Di9" secondAttribute="bottom" constant="131" id="Vai-Fl-sce"/>
+                            <constraint firstItem="eGK-rv-Di9" firstAttribute="top" secondItem="r5f-Ou-c3F" secondAttribute="top" id="eJ9-kq-XHW"/>
+                            <constraint firstItem="eGK-rv-Di9" firstAttribute="trailing" secondItem="r5f-Ou-c3F" secondAttribute="trailing" id="gOo-Pe-Px4"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="r5f-Ou-c3F"/>
                     </view>
                     <connections>
-                        <outlet property="cityTextField" destination="hK7-Q7-pxT" id="WQu-lx-fpL"/>
+                        <outlet property="cityTextField" destination="saL-o2-5yw" id="Cj0-WZ-Lg0"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="oef-Ns-gWS" userLabel="First Responder" sceneMemberID="firstResponder"/>
