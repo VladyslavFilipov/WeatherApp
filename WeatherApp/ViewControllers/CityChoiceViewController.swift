@@ -12,20 +12,33 @@ class CityChoiceViewController: UIViewController, Territory, Forecast {
 
     @IBOutlet weak var cityTextField: UITextField!
     
-    var city = CityInfo()
     var territoryDelegate: Territory?
     var forecastDelegate: Forecast?
+    var spinnerDelegate: Spinner?
+    
+    var city = CityInfo()
+    var imageView = UIImageView()
     var apiKey = ""
+    
+    override func viewWillAppear(_ animated: Bool) {
+        self.view.insertSubview(imageView, at: 0)
+    }
 
     @IBAction func doneButtonPressed(_ sender: Any) {
-        guard let city = cityTextField.text else { return }
+        self.spinnerDelegate?.addSpinner()
+        guard var city = cityTextField.text else { return }
+        city = city.getAllPhrase(separatedBy: " ")
         self.city.locationDelegate = self
         self.city.forecastDelegate = self
         if city != "" {
             self.city.getJsonFromUrl(city, apiKey)
             self.dismiss(animated: true, completion: nil)
+            self.spinnerDelegate?.removeSpinner()
         }
-        else { self.dismiss(animated: true, completion: nil) }
+    }
+    
+    @IBAction func cancelButtonTapped(_ sender: Any) {
+        self.dismiss(animated: true, completion: nil)
     }
     
     func addHourlyForecast(value: [WeatherByHour], city: TerritoryInfo) {
@@ -43,4 +56,12 @@ class CityChoiceViewController: UIViewController, Territory, Forecast {
     func addLocation(withNameAndKey value: TerritoryInfo) {
         territoryDelegate?.addLocation(withNameAndKey: value)
     }
+    func forecastError(_ status: Bool) {
+        forecastDelegate?.forecastError(status)
+    }
+    
+    func territoryError(_ status: Bool) {
+        territoryDelegate?.territoryError(status)
+    }
+    
 }

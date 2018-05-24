@@ -9,6 +9,7 @@
 import Foundation
 
 class CityInfo : Forecast {
+  
     var locationDelegate: Territory?
     var forecastDelegate: Forecast?
     
@@ -24,13 +25,15 @@ class CityInfo : Forecast {
             guard let data = data else { return }
             do {
                 let city = try JSONDecoder().decode([City].self, from: data)
-                let cityName = city[0].name
-                let cityKey = city[0].key
-                let territory = TerritoryInfo(name: cityName, key: cityKey)
-                self.locationDelegate?.addTerritory(withNameAndKey: territory)
-                self.hourly.getJsonFromUrl(territory, apiKey)
-                self.daily.getJsonFromUrl(territory, apiKey)
-            } catch { print("It`s an error here") }
+                if city != [City]() {
+                    let territory = TerritoryInfo(name: city[0].name, key: city[0].key)
+                    self.locationDelegate?.addTerritory(withNameAndKey: territory)
+                    self.hourly.getJsonFromUrl(territory, apiKey)
+                    self.daily.getJsonFromUrl(territory, apiKey)
+                } else { self.locationDelegate?.territoryError(false) }
+            } catch { print("City getting by name error")
+                self.locationDelegate?.territoryError(false)
+            }
         }).resume()
     }
     
@@ -40,5 +43,9 @@ class CityInfo : Forecast {
     
     func addDailyForecast(value: WeatherByDay, city: TerritoryInfo) {
         forecastDelegate?.addDailyForecast(value: value, city: city)
+    }
+    
+    func forecastError(_ status: Bool) {
+        forecastDelegate?.forecastError(status)
     }
 }

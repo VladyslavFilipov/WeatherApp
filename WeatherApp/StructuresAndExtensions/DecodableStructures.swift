@@ -8,7 +8,19 @@
 
 import Foundation
 
-struct City: Decodable {
+struct TerritoryInfo : Equatable {
+    let name: String
+    let key: String
+    
+    static func == (lhs: TerritoryInfo, rhs: TerritoryInfo) -> Bool {
+        if lhs.name == rhs.name && lhs.key == rhs.key {
+            return true
+        }
+        return false
+    }
+}
+
+struct City: Decodable , Equatable{
     let name : String
     let key : String
     
@@ -22,9 +34,15 @@ struct City: Decodable {
         self.name = try container.decode(String.self, forKey: .name)
         self.key = try container.decode(String.self, forKey: .key)
     }
+    
+    static func == (lhs: City, rhs: City) -> Bool {
+        if lhs.name == rhs.name && lhs.key == rhs.key { return true }
+        return false
+    }
 }
 
-struct WeatherByHour: Decodable {
+struct WeatherByHour: Decodable, Equatable {
+    
     let dateTime : String
     let phrase : String
     let temperature : Temperature
@@ -41,9 +59,14 @@ struct WeatherByHour: Decodable {
         self.phrase = try container.decode(String.self, forKey: .phrase)
         self.temperature = try container.decode(Temperature.self, forKey: .temperature)
     }
+    
+    static func == (lhs: WeatherByHour, rhs: WeatherByHour) -> Bool {
+        if lhs.phrase == rhs.phrase && lhs.dateTime == rhs.dateTime && lhs.temperature == rhs.temperature { return true }
+        return false
+    }
 }
 
-struct Temperature : Decodable {
+struct Temperature : Decodable, Equatable {
     let unit : String
     let value : Double
     
@@ -57,9 +80,13 @@ struct Temperature : Decodable {
         self.unit = try container.decode(String.self, forKey: .unit)
         self.value = try container.decode(Double.self, forKey: .value)
     }
+    static func == (lhs: Temperature, rhs: Temperature) -> Bool {
+        if lhs.unit == rhs.unit && lhs.value == rhs.value { return true }
+        return false
+    }
 }
 
-struct WeatherByDay: Decodable {
+struct WeatherByDay: Decodable , Equatable {
     let forecast : [DailyForecast]
     
     private enum Key: String, CodingKey {
@@ -70,9 +97,15 @@ struct WeatherByDay: Decodable {
         let container = try decoder.container(keyedBy: Key.self)
         self.forecast = try container.decode([DailyForecast].self, forKey: .forecast)
     }
+    
+    static func == (lhs: WeatherByDay, rhs: WeatherByDay) -> Bool {
+        if lhs.forecast == rhs.forecast { return true }
+        return false
+    }
 }
 
-struct DailyForecast : Decodable {
+struct DailyForecast : Decodable, Equatable {
+    
     let date : String
     let day : WeatherInDayPhrase
     let temperature : TemperatureExtremums
@@ -89,9 +122,14 @@ struct DailyForecast : Decodable {
         self.day = try container.decode(WeatherInDayPhrase.self, forKey: .day)
         self.temperature = try container.decode(TemperatureExtremums.self, forKey: .temperature)
     }
+    
+    static func == (lhs: DailyForecast, rhs: DailyForecast) -> Bool {
+        if lhs.date == rhs.date && lhs.day == rhs.day && lhs.temperature == rhs.temperature { return true }
+        return false
+    }
 }
 
-struct WeatherInDayPhrase: Decodable {
+struct WeatherInDayPhrase: Decodable , Equatable {
     let phrase : String
     
     private enum Key: String, CodingKey {
@@ -102,9 +140,14 @@ struct WeatherInDayPhrase: Decodable {
         let container = try decoder.container(keyedBy: Key.self)
         self.phrase = try container.decode(String.self, forKey: .phrase)
     }
+    
+    static func == (lhs: WeatherInDayPhrase, rhs: WeatherInDayPhrase) -> Bool {
+        if lhs.phrase == rhs.phrase  { return true }
+        return false
+    }
 }
 
-struct TemperatureExtremums : Decodable {
+struct TemperatureExtremums : Decodable , Equatable {
     let max : Temperature
     let min : Temperature
     
@@ -117,5 +160,10 @@ struct TemperatureExtremums : Decodable {
         let container = try decoder.container(keyedBy: Key.self)
         self.max = try container.decode(Temperature.self, forKey: .max)
         self.min = try container.decode(Temperature.self, forKey: .min)
+    }
+    
+    static func == (lhs: TemperatureExtremums, rhs: TemperatureExtremums) -> Bool {
+        if lhs.max == rhs.max && lhs.min == rhs.min  { return true }
+        return false
     }
 }

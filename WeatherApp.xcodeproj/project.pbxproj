@@ -22,6 +22,8 @@
 		36A5C92620AC759200FC1187 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36A5C92520AC759200FC1187 /* Extensions.swift */; };
 		36A5C92820AD8A6E00FC1187 /* CityChoiceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36A5C92720AD8A6E00FC1187 /* CityChoiceViewController.swift */; };
 		36A5C92A20ADA8A500FC1187 /* DecodableStructures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36A5C92920ADA8A500FC1187 /* DecodableStructures.swift */; };
+		36F146DA20B5969C00D41AD2 /* BasicModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36F146D920B5969C00D41AD2 /* BasicModel.swift */; };
+		36F146DC20B6D82100D41AD2 /* InternetConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36F146DB20B6D82100D41AD2 /* InternetConnection.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +44,8 @@
 		36A5C92520AC759200FC1187 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		36A5C92720AD8A6E00FC1187 /* CityChoiceViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CityChoiceViewController.swift; sourceTree = "<group>"; };
 		36A5C92920ADA8A500FC1187 /* DecodableStructures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DecodableStructures.swift; sourceTree = "<group>"; };
+		36F146D920B5969C00D41AD2 /* BasicModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BasicModel.swift; sourceTree = "<group>"; };
+		36F146DB20B6D82100D41AD2 /* InternetConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InternetConnection.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +98,8 @@
 				3699BDD520B41C03004812A3 /* CityInfoModel.swift */,
 				3699BDD720B4289D004812A3 /* DailyWeatherModel.swift */,
 				3699BDD920B429C0004812A3 /* HourlyWeatherModel.swift */,
+				36F146D920B5969C00D41AD2 /* BasicModel.swift */,
+				36F146DB20B6D82100D41AD2 /* InternetConnection.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -203,11 +209,13 @@
 				36A5C92220AC5A6000FC1187 /* WeatherTableViewCell.swift in Sources */,
 				36A5C92820AD8A6E00FC1187 /* CityChoiceViewController.swift in Sources */,
 				3620AEFB20AAD0CC00E6BBED /* WeatherViewController.swift in Sources */,
+				36F146DA20B5969C00D41AD2 /* BasicModel.swift in Sources */,
 				3620AEE320AACE2F00E6BBED /* AppDelegate.swift in Sources */,
 				3699BDDA20B429C0004812A3 /* HourlyWeatherModel.swift in Sources */,
 				36A5C92420AC67A900FC1187 /* WeatherCollectionViewCell.swift in Sources */,
 				3620AF0320AAF59300E6BBED /* PageViewController.swift in Sources */,
 				36A5C92620AC759200FC1187 /* Extensions.swift in Sources */,
+				36F146DC20B6D82100D41AD2 /* InternetConnection.swift in Sources */,
 				36A5C92A20ADA8A500FC1187 /* DecodableStructures.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -365,7 +373,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.filipowladislav.WeatherApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -383,7 +391,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.filipowladislav.WeatherApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

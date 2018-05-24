@@ -20,7 +20,9 @@ class HourlyWeather {
             do {
                 let weather = try JSONDecoder().decode([WeatherByHour].self, from: data)
                 self.forecastDelegate?.addHourlyForecast(value: weather, city: city)
-            } catch { print("It`s an error here") }
+            } catch { print("Hourly forecast getting error")
+                self.forecastDelegate?.forecastError(false)
+            }
         }).resume()
     }
 }

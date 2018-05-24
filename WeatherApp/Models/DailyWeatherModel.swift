@@ -20,7 +20,9 @@ class DailyWeather {
             do {
                 let weather = try JSONDecoder().decode(WeatherByDay.self, from: data)
                 self.forecastDelegate?.addDailyForecast(value: weather, city: city)
-            } catch { print("It`s an error here") }
+            } catch { print("Daily forecast getting error")
+                self.forecastDelegate?.forecastError(false)
+            }
         }).resume()
     }
 }
