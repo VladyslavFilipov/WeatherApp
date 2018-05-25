@@ -27,13 +27,12 @@ class HourlyWeather {
                 if weather != [WeatherByHour]() {
                     self.error = false
                     self.forecastDelegate?.addHourlyForecast(value: weather, city: city)
-                } else {
+                } else { print("Hourly forecast getting error")
                     self.error = true
                 }
             } catch { print("Hourly forecast getting error")
                 self.error = true
             }
-            print(self.error, "hourly")
         }).resume()
     }
 }

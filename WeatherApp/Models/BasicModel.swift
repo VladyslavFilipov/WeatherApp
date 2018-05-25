@@ -9,6 +9,6 @@
 import Foundation
 
 class Basic {
-    let apiKey = "74clEDeO8nCzGLWuiiovsDoFoxEgyAcq"
+    let apiKey = "mq1o5M8qCjDtgcR0ySpd4bhOCYTDFhgP"
     let weatherTypeArray = ["sun", "cloud", "rain", "snow", "storm", "clear", "fog", "flur", "ice", "sleet", "rain and snow", "wind", "cold", "hot"]
 }

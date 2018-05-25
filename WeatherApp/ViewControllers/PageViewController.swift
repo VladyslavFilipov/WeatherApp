@@ -20,19 +20,18 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
 
     @IBOutlet weak var pageControl: UIPageControl!
     @IBOutlet weak var connectionTroublesLabel: UILabel!
-    @IBOutlet weak var addButton: UIButton!
+    @IBOutlet weak var addCityByNameButton: UIButton!
+    @IBOutlet weak var addCityByMapButton: UIButton!
     @IBOutlet weak var retryButton: UIButton!
     
     let location = Geolocation()
-    let cityInfo = CityInfo()
-    let daily = DailyWeather()
-    let hourly = HourlyWeather()
     let basic = Basic()
     
-    var spinner = UIView()
     var error : ErrorType = .none
+    
     var pageViewController: UIPageViewController?
     var pendingIndex: Int?
+    var spinner = UIView()
     var territoryArray = [TerritoryInfo]()
     var weather = (byDay: [WeatherByDay](), byHour: [[WeatherByHour]]()) {
         didSet { DispatchQueue.main.async {
@@ -42,11 +41,11 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        pageControl.backgroundColor = UIColor.clear.withAlphaComponent(0.5)
         location.forecastDelegate = self
         location.locationDelegate = self
         location.spinnerDelegate = self
         location.apiKey = basic.apiKey
+        pageControl.backgroundColor = UIColor.clear.withAlphaComponent(0.5)
         if territoryArray.count == 0 {
             checkConnection(InternetConnection.isConnectedToNetwork())
         }
@@ -90,10 +89,7 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
             pageVC?.setViewControllers(controllers, direction: .forward, animated: true, completion: nil)
         }
         pageViewController = pageVC
-        if self.childViewControllers.count == 1 {
-            view.subviews[1].removeFromSuperview()
-            self.childViewControllers[0].removeFromParentViewController()
-        }
+        removeSubviewIfExist()
         self.addChildViewController(pageViewController!)
         self.view.insertSubview(pageViewController!.view, belowSubview: pageControl)
         pageViewController!.didMove(toParentViewController: self)
@@ -116,7 +112,8 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
         UIApplication.shared.statusBarStyle = .lightContent
         connectionTroublesLabel.isHidden = status
         retryButton.isHidden = status
-        addButton.isHidden = !status
+        addCityByNameButton.isHidden = !status
+        addCityByMapButton.isHidden = !status
         pageControl.isHidden = !status
         if status {
             if !Geolocation.isEnabled() && territoryArray.count == 0 {
@@ -125,10 +122,14 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
             }
             location.determineMyCurrentLocation()
         } else {
-            if self.childViewControllers.count > 0 {
-                view.subviews[1].removeFromSuperview()
-                self.childViewControllers[0].removeFromParentViewController()
-            }
+            removeSubviewIfExist()
+        }
+    }
+    
+    private func removeSubviewIfExist() {
+        if self.childViewControllers.count == 1 {
+            view.subviews[1].removeFromSuperview() // view.subviews[1] (if exist) - always pageViewController.view
+            self.childViewControllers[0].removeFromParentViewController() // self.childViewControllers[0] (if exist) - pageViewController
         }
     }
     
@@ -186,9 +187,22 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
         error = .internet
     }
     
-    @IBAction func addCity(_ sender: Any) {
+    @IBAction func addCityByNameButtonTapped(_ sender: Any) {
         guard let cityVC = createCityVC() else { return }
         self.present(cityVC, animated: true, completion: nil)
+    }
+    
+    @IBAction func addCityByMapButtonTapped(_ sender: Any) {
+        guard let mapVC = self.storyboard?.instantiateViewController(withIdentifier: "mapVC") as? MapViewController else { return }
+        mapVC.territoryDelegate = self
+        mapVC.forecastDelegate = self
+        mapVC.apiKey = basic.apiKey
+        if territoryArray.count > 0 && (Geolocation.isEnabled() && InternetConnection.isConnectedToNetwork()) {
+            mapVC.imageView = getBackgroundImage(by: pageControl.currentPage) }
+        else { mapVC.imageView = UIImageView(frame: view.bounds)
+            mapVC.imageView.image = UIImage(named: "sun")
+        }
+        self.present(mapVC, animated: true, completion: nil)
     }
     
     @IBAction func retryButtonTapped(_ sender: Any) {

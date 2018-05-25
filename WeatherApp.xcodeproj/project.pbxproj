@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3615033A20B82FAB00A36B3A /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3615033920B82FAB00A36B3A /* MapViewController.swift */; };
 		3620AEE320AACE2F00E6BBED /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3620AEE220AACE2F00E6BBED /* AppDelegate.swift */; };
 		3620AEEC20AACE2F00E6BBED /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3620AEEA20AACE2F00E6BBED /* Main.storyboard */; };
 		3620AEEE20AACE3100E6BBED /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3620AEED20AACE3100E6BBED /* Assets.xcassets */; };
@@ -27,6 +28,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3615033920B82FAB00A36B3A /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
 		3620AEDF20AACE2F00E6BBED /* WeatherApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WeatherApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3620AEE220AACE2F00E6BBED /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3620AEEB20AACE2F00E6BBED /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -116,9 +118,10 @@
 		36A5C92C20AF179200FC1187 /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
+				3620AF0220AAF59300E6BBED /* PageViewController.swift */,
 				3620AEFA20AAD0CC00E6BBED /* WeatherViewController.swift */,
 				36A5C92720AD8A6E00FC1187 /* CityChoiceViewController.swift */,
-				3620AF0220AAF59300E6BBED /* PageViewController.swift */,
+				3615033920B82FAB00A36B3A /* MapViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -216,6 +219,7 @@
 				3620AF0320AAF59300E6BBED /* PageViewController.swift in Sources */,
 				36A5C92620AC759200FC1187 /* Extensions.swift in Sources */,
 				36F146DC20B6D82100D41AD2 /* InternetConnection.swift in Sources */,
+				3615033A20B82FAB00A36B3A /* MapViewController.swift in Sources */,
 				36A5C92A20ADA8A500FC1187 /* DecodableStructures.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -53,11 +53,12 @@ class Geolocation : CLLocationManager, CLLocationManagerDelegate, Forecast {
         userLocation = locations[0] as CLLocation
         daily.forecastDelegate = self
         hourly.forecastDelegate = self
-        parseJsonFromUrl()
+        parseJsonFromUrl(with: userLocation?.coordinate)
+        self.locationManager.stopUpdatingLocation()
     }
     
-    func parseJsonFromUrl() {
-        guard let coordinate = userLocation?.coordinate else { return }
+    func parseJsonFromUrl(with coordinates: CLLocationCoordinate2D?) {
+        guard let coordinate = coordinates else { return }
         let city = "https://dataservice.accuweather.com/locations/v1/cities/geoposition/search?apikey=\(apiKey)&q=\(coordinate.latitude)%2C\(coordinate.longitude)"
         guard let cityURL = URL(string: city) else { return }
         URLSession.shared.dataTask(with: cityURL, completionHandler: {(data, response, error) -> Void in
@@ -65,7 +66,6 @@ class Geolocation : CLLocationManager, CLLocationManagerDelegate, Forecast {
             do {
                 let city = try JSONDecoder().decode(City.self, from: data)
                 let territory = TerritoryInfo(name: city.name, key: city.key)
-                self.locationManager.stopUpdatingLocation()
                 self.daily.parseJsonFromUrl(territory, self.apiKey)
                 self.hourly.parseJsonFromUrl(territory, self.apiKey)
                 self.locationDelegate?.addLocation(withNameAndKey: territory)

@@ -29,7 +29,6 @@ class DailyWeather {
             } catch { print("Daily forecast getting error")
                 self.error = true
             }
-            print(self.error, "daily")
         }).resume()
     }
 }
