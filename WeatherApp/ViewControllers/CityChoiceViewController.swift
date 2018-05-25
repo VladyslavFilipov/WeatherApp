@@ -31,7 +31,7 @@ class CityChoiceViewController: UIViewController, Territory, Forecast {
         self.city.locationDelegate = self
         self.city.forecastDelegate = self
         if city != "" {
-            self.city.getJsonFromUrl(city, apiKey)
+            self.city.parseJsonFromUrl(city, apiKey)
             self.dismiss(animated: true, completion: nil)
             self.spinnerDelegate?.removeSpinner()
         }
@@ -63,5 +63,4 @@ class CityChoiceViewController: UIViewController, Territory, Forecast {
     func territoryError(_ status: Bool) {
         territoryDelegate?.territoryError(status)
     }
-    
 }

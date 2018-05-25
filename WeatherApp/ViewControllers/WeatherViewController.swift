@@ -66,9 +66,15 @@ class WeatherViewController: UIViewController, UIScrollViewDelegate, Territory, 
     
     func setupMainLabelsBackground(_ color: UIColor) {
         cityLabel.textColor = color
+        cityLabel.shadowColor = color.invert()
         temperatureLabel.textColor = color
+        temperatureLabel.shadowColor = color.invert()
         weatherLabel.textColor = color
+        weatherLabel.shadowColor = color.invert()
         dateLabel.textColor = color
+        dateLabel.shadowColor = color.invert()
+        scrollView.refreshControl?.tintColor = color
+        scrollView.refreshControl?.attributedTitle = NSAttributedString(string: "Pull to refresh", attributes: [NSAttributedStringKey.foregroundColor: color])
     }
     
     private func setupTodaysDate() {
@@ -93,7 +99,13 @@ class WeatherViewController: UIViewController, UIScrollViewDelegate, Territory, 
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let translation = scrollView.panGestureRecognizer.translation(in: scrollView.superview!)
         if translation.y > 200 {
-            connectionDelegate?.checkConnection(InternetConnection.isConnectedToNetwork())
+            if !InternetConnection.isConnectedToNetwork() {
+                connectionDelegate?.checkConnection(InternetConnection.isConnectedToNetwork())
+                return
+            } else if !Geolocation.isEnabled() {
+                locationDelegate?.territoryError(!Geolocation.isEnabled())
+                return
+            }
         }
     }
     
@@ -112,7 +124,7 @@ class WeatherViewController: UIViewController, UIScrollViewDelegate, Territory, 
     func addTerritory(withNameAndKey value: TerritoryInfo) {  }
     
     func addLocation(withNameAndKey value: TerritoryInfo) {
-        if self.itemIndex == 0 && location.isEnabled() { self.locationDelegate?.addLocation(withNameAndKey: value) }
+        if self.itemIndex == 0 { self.locationDelegate?.addLocation(withNameAndKey: value) }
     }
     
     func addHourlyForecast(value: [WeatherByHour], city: TerritoryInfo) {

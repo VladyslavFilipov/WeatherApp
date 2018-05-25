@@ -12,11 +12,16 @@ class CityInfo : Forecast {
   
     var locationDelegate: Territory?
     var forecastDelegate: Forecast?
+    var error = Bool() {
+        didSet {
+            if self.error { self.locationDelegate?.territoryError(self.error) }
+        }
+    }
     
     let hourly = HourlyWeather()
     let daily = DailyWeather()
     
-    func getJsonFromUrl(_ city: String, _ apiKey: String) {
+    func parseJsonFromUrl(_ city: String, _ apiKey: String) {
         hourly.forecastDelegate = self
         daily.forecastDelegate = self
         let cityURLString = "https://dataservice.accuweather.com/locations/v1/cities/search?apikey=\(apiKey)&q=\(city)"
@@ -27,25 +32,27 @@ class CityInfo : Forecast {
                 let city = try JSONDecoder().decode([City].self, from: data)
                 if city != [City]() {
                     let territory = TerritoryInfo(name: city[0].name, key: city[0].key)
-                    self.locationDelegate?.addTerritory(withNameAndKey: territory)
-                    self.hourly.getJsonFromUrl(territory, apiKey)
-                    self.daily.getJsonFromUrl(territory, apiKey)
-                } else { self.locationDelegate?.territoryError(false) }
+                    self.hourly.parseJsonFromUrl(territory, apiKey)
+                    self.daily.parseJsonFromUrl(territory, apiKey)
+                    if !self.hourly.error && !self.daily.error {
+                        self.locationDelegate?.addTerritory(withNameAndKey: territory)
+                    }
+                } else { self.error = false }
             } catch { print("City getting by name error")
-                self.locationDelegate?.territoryError(false)
+                self.error = true
             }
         }).resume()
     }
     
     func addHourlyForecast(value: [WeatherByHour], city: TerritoryInfo) {
-        forecastDelegate?.addHourlyForecast(value: value, city: city)
+        if !error { forecastDelegate?.addHourlyForecast(value: value, city: city) }
     }
     
     func addDailyForecast(value: WeatherByDay, city: TerritoryInfo) {
-        forecastDelegate?.addDailyForecast(value: value, city: city)
+        if !error { forecastDelegate?.addDailyForecast(value: value, city: city) }
     }
     
     func forecastError(_ status: Bool) {
-        forecastDelegate?.forecastError(status)
+        if !error { forecastDelegate?.forecastError(status) }
     }
 }

@@ -94,11 +94,11 @@
 		3699BDDB20B45B4D004812A3 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				36F146D920B5969C00D41AD2 /* BasicModel.swift */,
 				3699BDD320B41804004812A3 /* GeolocationModel.swift */,
 				3699BDD520B41C03004812A3 /* CityInfoModel.swift */,
 				3699BDD720B4289D004812A3 /* DailyWeatherModel.swift */,
 				3699BDD920B429C0004812A3 /* HourlyWeatherModel.swift */,
-				36F146D920B5969C00D41AD2 /* BasicModel.swift */,
 				36F146DB20B6D82100D41AD2 /* InternetConnection.swift */,
 			);
 			path = Models;

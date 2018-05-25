@@ -10,7 +10,8 @@ import Foundation
 import CoreLocation
 import UIKit
 
-extension PageViewController : UIPageViewControllerDataSource {
+extension PageViewController : UIPageViewControllerDataSource, UIPageViewControllerDelegate {
+    
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
         guard let weatherVC = viewController as? WeatherViewController else { return nil }
         if weatherVC.itemIndex > 0 {
@@ -25,6 +26,19 @@ extension PageViewController : UIPageViewControllerDataSource {
             return getWeatherViewController(withIndex: weatherVC.itemIndex + 1)
         }
         return nil
+    }
+    
+    func pageViewController(_ pageViewController: UIPageViewController, willTransitionTo pendingViewControllers: [UIViewController]) {
+        pendingIndex = (pendingViewControllers.first as! WeatherViewController).itemIndex
+    }
+    
+    func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
+        if completed {
+            let currentIndex = pendingIndex
+            if let index = currentIndex {
+                self.pageControl.currentPage = index
+            }
+        }
     }
 }
 
@@ -66,6 +80,7 @@ extension WeatherViewController : UITableViewDelegate, UITableViewDataSource {
 }
 
 extension String {
+    
     func containsIgnoringCase(find: String) -> Bool{
         return self.range(of: find, options: .caseInsensitive) != nil
     }
@@ -90,6 +105,7 @@ extension String {
 }
 
 extension Double {
+    
     func toString() -> String {
         let value = self
         return String(format: "%.1f", value)
@@ -97,6 +113,7 @@ extension Double {
 }
 
 extension UIViewController {
+    
     func displaySpinner(onView : UIView) -> UIView {
         let spinnerView = UIView.init(frame: onView.bounds)
         spinnerView.backgroundColor = UIColor.init(red: 0.5, green: 0.5, blue: 0.5, alpha: 0.5)
@@ -108,7 +125,6 @@ extension UIViewController {
             spinnerView.addSubview(activityIndicator)
             onView.addSubview(spinnerView)
         }
-        
         return spinnerView
     }
     
@@ -116,5 +132,22 @@ extension UIViewController {
         DispatchQueue.main.async {
             spinner.removeFromSuperview()
         }
+    }
+}
+
+extension UIColor {
+    
+    func invert() -> UIColor {
+        var red         :   CGFloat  =   255.0
+        var green       :   CGFloat  =   255.0
+        var blue        :   CGFloat  =   255.0
+        var alpha       :   CGFloat  =   1.0
+        
+        self.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        red     =   255.0 - (red * 255.0)
+        green   =   255.0 - (green * 255.0)
+        blue    =   255.0 - (blue * 255.0)
+        
+        return UIColor(red: red / 255.0, green: green / 255.0, blue: blue / 255.0, alpha: alpha)
     }
 }

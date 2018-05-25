@@ -24,20 +24,21 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
     @IBOutlet weak var retryButton: UIButton!
     
     let location = Geolocation()
+    let cityInfo = CityInfo()
     let daily = DailyWeather()
+    let hourly = HourlyWeather()
     let basic = Basic()
     
     var spinner = UIView()
     var error : ErrorType = .none
     var pageViewController: UIPageViewController?
     var pendingIndex: Int?
-    var territoryArray = [TerritoryInfo]() {
-        didSet { DispatchQueue.main.async { self.pageControl.numberOfPages = self.territoryArray.count } }
-    }
+    var territoryArray = [TerritoryInfo]()
     var weather = (byDay: [WeatherByDay](), byHour: [[WeatherByHour]]()) {
         didSet { DispatchQueue.main.async {
             if self.weather.byDay.count == self.weather.byHour.count {
-                self.createPageViewController() } } }
+                self.pageControl.numberOfPages = self.territoryArray.count
+                self.createPageViewController( self.pageControl.currentPage ) } } }
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -62,7 +63,6 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
             weatherVC?.locationDelegate = self
             weatherVC?.forecastDelegate = self
             weatherVC?.connectionDelegate = self
-            pageControl.currentPage = index
             return weatherVC
         }
         return nil
@@ -80,19 +80,20 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
         return imageView
     }
     
-    private func createPageViewController() {
+    private func createPageViewController(_ index: Int) {
         let pageVC = self.storyboard?.instantiateViewController(withIdentifier: "pageVC") as? UIPageViewController
         pageVC?.dataSource = self
+        pageVC?.delegate = self
         if territoryArray.count > 0 {
-            guard let controller = getWeatherViewController(withIndex: territoryArray.count - 1) else { return }
+            guard let controller = getWeatherViewController(withIndex: index) else { return }
             let controllers = [controller]
             pageVC?.setViewControllers(controllers, direction: .forward, animated: true, completion: nil)
         }
+        pageViewController = pageVC
         if self.childViewControllers.count == 1 {
-            view.subviews[0].removeFromSuperview()
+            view.subviews[1].removeFromSuperview()
             self.childViewControllers[0].removeFromParentViewController()
         }
-        pageViewController = pageVC
         self.addChildViewController(pageViewController!)
         self.view.insertSubview(pageViewController!.view, belowSubview: pageControl)
         pageViewController!.didMove(toParentViewController: self)
@@ -103,7 +104,8 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
         cityVC?.territoryDelegate = self
         cityVC?.forecastDelegate = self
         cityVC?.apiKey = basic.apiKey
-        if territoryArray.count > 0 && location.isEnabled() { cityVC?.imageView = getBackgroundImage(by: pageControl.currentPage) }
+        if territoryArray.count > 0 && (Geolocation.isEnabled() && InternetConnection.isConnectedToNetwork()) {
+            cityVC?.imageView = getBackgroundImage(by: pageControl.currentPage) }
         else { cityVC?.imageView = UIImageView(frame: view.bounds)
             cityVC?.imageView.image = UIImage(named: "sun")
         }
@@ -111,24 +113,22 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
     }
     
     private func performingError(_ status: Bool) {
+        UIApplication.shared.statusBarStyle = .lightContent
         connectionTroublesLabel.isHidden = status
-        addButton.isEnabled = status
         retryButton.isHidden = status
+        addButton.isHidden = !status
         pageControl.isHidden = !status
         if status {
-            if !location.isEnabled() && territoryArray.count == 0 {
+            if !Geolocation.isEnabled() && territoryArray.count == 0 {
                 guard let cityVC = createCityVC() else { return }
                 self.present(cityVC, animated: true, completion: nil)
             }
             location.determineMyCurrentLocation()
         } else {
-            if self.childViewControllers.count == 1 {
-                view.subviews[0].removeFromSuperview()
+            if self.childViewControllers.count > 0 {
+                view.subviews[1].removeFromSuperview()
                 self.childViewControllers[0].removeFromParentViewController()
             }
-            territoryArray.removeAll()
-            weather.byDay.removeAll()
-            weather.byHour.removeAll()
         }
     }
     
@@ -165,7 +165,7 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
     func forecastError(_ status: Bool) {
         DispatchQueue.main.async {
             self.connectionTroublesLabel.text = "Forecast troubles"
-            self.performingError(status)
+            self.performingError(!status)
         }
         error = .forecast
     }
@@ -173,7 +173,7 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
     func territoryError(_ status: Bool) {
         DispatchQueue.main.async {
             self.connectionTroublesLabel.text = "Territory determination troubles"
-            self.performingError(status)
+            self.performingError(!status)
         }
         error = .territory
     }
@@ -196,9 +196,9 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
         case .internet:
             checkConnection(InternetConnection.isConnectedToNetwork())
         case .forecast:
-            forecastError(true)
+            forecastError(false)
         case .territory:
-            territoryError(true)
+            territoryError(false)
         default:
             print("Something went wrong")
         }

@@ -15,6 +15,11 @@ class Geolocation : CLLocationManager, CLLocationManagerDelegate, Forecast {
     var locationDelegate: Territory?
     var forecastDelegate: Forecast?
     var spinnerDelegate: Spinner?
+    var error = Bool() {
+        didSet {
+            if self.error { self.locationDelegate?.territoryError(self.error) }
+        }
+    }
     
     let daily = DailyWeather()
     let hourly = HourlyWeather()
@@ -22,7 +27,7 @@ class Geolocation : CLLocationManager, CLLocationManagerDelegate, Forecast {
     var locationManager: CLLocationManager!
     var userLocation: CLLocation?
     
-    func isEnabled() -> Bool {
+    class func isEnabled() -> Bool {
         if CLLocationManager.locationServicesEnabled() {
             switch CLLocationManager.authorizationStatus() {
             case .notDetermined, .restricted, .denied:
@@ -40,7 +45,7 @@ class Geolocation : CLLocationManager, CLLocationManagerDelegate, Forecast {
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.requestAlwaysAuthorization()
-        if self.isEnabled() { locationManager.startUpdatingLocation() }
+        if Geolocation.isEnabled() { locationManager.startUpdatingLocation() }
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
@@ -48,11 +53,10 @@ class Geolocation : CLLocationManager, CLLocationManagerDelegate, Forecast {
         userLocation = locations[0] as CLLocation
         daily.forecastDelegate = self
         hourly.forecastDelegate = self
-        getJsonFromUrl()
-        self.locationManager.stopUpdatingLocation()
+        parseJsonFromUrl()
     }
     
-    func getJsonFromUrl() {
+    func parseJsonFromUrl() {
         guard let coordinate = userLocation?.coordinate else { return }
         let city = "https://dataservice.accuweather.com/locations/v1/cities/geoposition/search?apikey=\(apiKey)&q=\(coordinate.latitude)%2C\(coordinate.longitude)"
         guard let cityURL = URL(string: city) else { return }
@@ -61,25 +65,28 @@ class Geolocation : CLLocationManager, CLLocationManagerDelegate, Forecast {
             do {
                 let city = try JSONDecoder().decode(City.self, from: data)
                 let territory = TerritoryInfo(name: city.name, key: city.key)
+                self.locationManager.stopUpdatingLocation()
+                self.daily.parseJsonFromUrl(territory, self.apiKey)
+                self.hourly.parseJsonFromUrl(territory, self.apiKey)
                 self.locationDelegate?.addLocation(withNameAndKey: territory)
-                self.daily.getJsonFromUrl(territory, self.apiKey)
-                self.hourly.getJsonFromUrl(territory, self.apiKey)
                 self.spinnerDelegate?.removeSpinner()
+                self.error = false
+                return
             } catch { print("City getting by geolocation error", error)
-                self.locationDelegate?.territoryError(false)
+                self.error = true
             }
         }).resume()
     }
     
     func addHourlyForecast(value: [WeatherByHour], city: TerritoryInfo) {
-        forecastDelegate?.addHourlyForecast(value: value, city: city)
+        if !error { forecastDelegate?.addHourlyForecast(value: value, city: city) }
     }
     
     func addDailyForecast(value: WeatherByDay, city: TerritoryInfo) {
-        forecastDelegate?.addDailyForecast(value: value, city: city)
+        if !error { forecastDelegate?.addDailyForecast(value: value, city: city) }
     }
     
     func forecastError(_ status: Bool) {
-        forecastDelegate?.forecastError(status)
+        if !error { forecastDelegate?.forecastError(status) }
     }
 }
