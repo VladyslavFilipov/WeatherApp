@@ -14,9 +14,7 @@ class CityInfo : Forecast {
     var forecastDelegate: Forecast?
     var error = Bool() {
         didSet {
-            if self.error { self.locationDelegate?.territoryError(self.error) }
-        }
-    }
+            if self.error { self.locationDelegate?.territoryError(self.error) } } }
     
     let hourly = HourlyWeather()
     let daily = DailyWeather()
@@ -26,22 +24,18 @@ class CityInfo : Forecast {
         daily.forecastDelegate = self
         let cityURLString = "https://dataservice.accuweather.com/locations/v1/cities/search?apikey=\(apiKey)&q=\(city)"
         guard let cityURL = URL(string: cityURLString) else { return }
-        URLSession.shared.dataTask(with: cityURL, completionHandler: {(data, response, error) -> Void in
-            guard let data = data else { return }
-            do {
-                let city = try JSONDecoder().decode([City].self, from: data)
-                if city != [City]() {
-                    let territory = TerritoryInfo(name: city[0].name, key: city[0].key)
-                    self.hourly.parseJsonFromUrl(territory, apiKey)
-                    self.daily.parseJsonFromUrl(territory, apiKey)
-                    if !self.hourly.error && !self.daily.error {
-                        self.locationDelegate?.addTerritory(withNameAndKey: territory)
-                    }
-                } else { self.error = false }
-            } catch { print("City getting by name error")
-                self.error = true
-            }
-        }).resume()
+        Session.parseJSON(with: cityURL, type: [City].self) { city in
+            guard let city = city else { self.error = true; return }
+            if city != [City]() {
+                let territory = TerritoryInfo(name: city[0].name, key: city[0].key)
+                self.hourly.parseJsonFromUrl(territory, apiKey)
+                self.daily.parseJsonFromUrl(territory, apiKey)
+                if !self.hourly.error && !self.daily.error {
+                    self.locationDelegate?.addTerritory(withNameAndKey: territory)
+                    self.error = false
+                }
+            } else { self.error = true }
+        }
     }
     
     func addHourlyForecast(value: [WeatherByHour], city: TerritoryInfo) {

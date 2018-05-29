@@ -49,14 +49,12 @@ class MapViewController: UIViewController, MKMapViewDelegate, Territory, Forecas
 
     @IBAction func doneButtonTapped(_ sender: Any) {
         self.spinnerDelegate?.addSpinner()
-        
         self.location.locationDelegate = self
         self.location.forecastDelegate = self
         self.city.forecastDelegate = self
         self.city.locationDelegate = self
         self.location.apiKey = apiKey
-        
-        location.parseJsonFromUrl(with: annotation.coordinate)
+        location.parseJSON(annotation.coordinate)
         self.dismiss(animated: true, completion: nil)
         self.spinnerDelegate?.removeSpinner()
     }
