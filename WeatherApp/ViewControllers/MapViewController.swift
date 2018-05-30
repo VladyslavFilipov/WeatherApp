@@ -9,7 +9,7 @@
 import UIKit
 import MapKit
 
-class MapViewController: UIViewController, MKMapViewDelegate, Territory, Forecast {
+class MapViewController: UIViewController {
     
     @IBOutlet weak var mkMapView: MKMapView!
     var territoryDelegate: Territory?
@@ -26,25 +26,9 @@ class MapViewController: UIViewController, MKMapViewDelegate, Territory, Forecas
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.insertSubview(imageView, at: 0)
-        
         annotation.title = "I chose it"
         mkMapView.delegate = self
         mkMapView.showsUserLocation = true
-    }
-    
-    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-        let renderer = MKPolylineRenderer(polyline: overlay as! MKPolyline)
-        renderer.strokeColor = UIColor.blue
-        return renderer
-    }
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for touch in touches {
-            let touchPoint = touch.location(in: self.mkMapView)
-            let location = self.mkMapView.convert(touchPoint, toCoordinateFrom: self.mkMapView)
-            annotation.coordinate = location
-            mkMapView.addAnnotation(annotation)
-        }
     }
 
     @IBAction func doneButtonTapped(_ sender: Any) {
@@ -62,28 +46,4 @@ class MapViewController: UIViewController, MKMapViewDelegate, Territory, Forecas
     @IBAction func cancelButtonTapped(_ sender: Any) {
         self.dismiss(animated: true, completion: nil)
     }
-    
-    func addHourlyForecast(value: [WeatherByHour], city: TerritoryInfo) {
-        forecastDelegate?.addHourlyForecast(value: value, city: city)
-    }
-    
-    func addDailyForecast(value: WeatherByDay, city: TerritoryInfo) {
-        forecastDelegate?.addDailyForecast(value: value, city: city)
-    }
-    
-    func addTerritory(withNameAndKey value: TerritoryInfo) {
-        territoryDelegate?.addTerritory(withNameAndKey: value)
-    }
-    
-    func addLocation(withNameAndKey value: TerritoryInfo) {
-        self.city.parseJsonFromUrl(value.name, apiKey)
-    }
-    func forecastError(_ status: Bool) {
-        forecastDelegate?.forecastError(status)
-    }
-    
-    func territoryError(_ status: Bool) {
-        territoryDelegate?.territoryError(status)
-    }
-    
 }

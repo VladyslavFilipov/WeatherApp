@@ -9,14 +9,7 @@
 import UIKit
 import CoreLocation
 
-enum ErrorType {
-    case none
-    case territory
-    case internet
-    case forecast
-}
-
-class PageViewController: UIViewController, Territory, Forecast, Spinner, Connection {
+class PageViewController: UIViewController {
 
     @IBOutlet weak var pageControl: UIPageControl!
     @IBOutlet weak var connectionTroublesLabel: UILabel!
@@ -41,18 +34,20 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
     }
     
     override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         location.forecastDelegate = self
         location.locationDelegate = self
         location.spinnerDelegate = self
         location.apiKey = basic.apiKey
         pageControl.backgroundColor = UIColor.clear.withAlphaComponent(0.5)
+        locationError(!Geolocation.isEnabled())
         if territoryArray.count == 0 {
             checkConnection(InternetConnection.isConnectedToNetwork())
         }
     }
     
     func getWeatherViewController(withIndex index: Int) -> WeatherViewController? {
-        if index < territoryArray.count {
+        if index < weather.byDay.count && (weather.byDay.count == weather.byHour.count) {
             let weatherVC = self.storyboard?.instantiateViewController(withIdentifier: "weatherVC") as? WeatherViewController
             weatherVC?.itemIndex = index
             weatherVC?.apiKey = basic.apiKey
@@ -62,6 +57,7 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
             weatherVC?.locationDelegate = self
             weatherVC?.forecastDelegate = self
             weatherVC?.connectionDelegate = self
+            weatherVC?.imageView = getBackgroundImage(by: index)
             return weatherVC
         }
         return nil
@@ -70,9 +66,9 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
     private func getBackgroundImage (by index: Int) -> UIImageView {
         let imageView = UIImageView(frame: view.bounds)
         let phrase = weather.byHour[index][0].phrase.components(separatedBy: "w/")
-        for weather in basic.weatherTypeArray {
-            if phrase[phrase.count - 1].containsIgnoringCase(find: weather) {
-                imageView.image = UIImage(named: weather)
+        for weather in WeatherPictures.allValues {
+            if phrase[phrase.count - 1].containsIgnoringCase(find: weather.rawValue) {
+                imageView.image = weather.image
                 break
             }
         }
@@ -108,7 +104,7 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
         return cityVC
     }
     
-    private func performingError(_ status: Bool) {
+    func performingError(_ status: Bool) {
         UIApplication.shared.statusBarStyle = .lightContent
         connectionTroublesLabel.isHidden = status
         retryButton.isHidden = status
@@ -116,9 +112,11 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
         addCityByMapButton.isHidden = !status
         pageControl.isHidden = !status
         if status {
-            if !Geolocation.isEnabled() && territoryArray.count == 0 {
-                guard let cityVC = createCityVC() else { return }
-                self.present(cityVC, animated: true, completion: nil)
+            if !Geolocation.isEnabled() {
+                if territoryArray.count == 0 {
+                    guard let cityVC = createCityVC() else { return }
+                    self.present(cityVC, animated: true, completion: nil)
+                }
             }
             location.determineMyCurrentLocation()
         } else {
@@ -131,60 +129,6 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
             view.subviews[1].removeFromSuperview() // view.subviews[1] (if exist) - always pageViewController.view
             self.childViewControllers[0].removeFromParentViewController() // self.childViewControllers[0] (if exist) - pageViewController
         }
-    }
-    
-    func addLocation(withNameAndKey value: TerritoryInfo) {
-        if territoryArray.count == 0 { territoryArray.append(value) }
-        else { territoryArray[0] = value }
-    }
-    
-    func addTerritory(withNameAndKey value: TerritoryInfo) {
-        if !territoryArray.contains(value) { territoryArray.append(value) }
-    }
-    
-    func addHourlyForecast(value: [WeatherByHour], city: TerritoryInfo) {
-        guard let index = territoryArray.index(of: city) else { return }
-        if index == weather.byHour.count { weather.byHour.append(value) }
-        else { weather.byHour[index] = value }
-    }
-    
-    func addDailyForecast(value: WeatherByDay, city: TerritoryInfo) {
-        guard let index = territoryArray.index(of: city) else { return }
-        if index == weather.byDay.count { weather.byDay.append(value) }
-        else { weather.byDay[index] = value }
-    }
-    
-    func addSpinner() {
-        spinner = self.displaySpinner(onView: self.view)
-        view.addSubview(spinner)
-    }
-    
-    func removeSpinner() {
-        self.removeSpinner(spinner: spinner)
-    }
-    
-    func forecastError(_ status: Bool) {
-        DispatchQueue.main.async {
-            self.connectionTroublesLabel.text = "Forecast troubles"
-            self.performingError(!status)
-        }
-        error = .forecast
-    }
-    
-    func territoryError(_ status: Bool) {
-        DispatchQueue.main.async {
-            self.connectionTroublesLabel.text = "Territory determination troubles"
-            self.performingError(!status)
-        }
-        error = .territory
-    }
-    
-    func checkConnection(_ status: Bool) {
-        DispatchQueue.main.async {
-            self.connectionTroublesLabel.text = "Internet connection troubles"
-            self.performingError(status)
-        }
-        error = .internet
     }
     
     @IBAction func addCityByNameButtonTapped(_ sender: Any) {
@@ -219,23 +163,3 @@ class PageViewController: UIViewController, Territory, Forecast, Spinner, Connec
     }
 }
 
-protocol Territory {
-    func addTerritory(withNameAndKey value: TerritoryInfo)
-    func addLocation(withNameAndKey value: TerritoryInfo)
-    func territoryError(_ status: Bool)
-}
-
-protocol Forecast {
-    func addHourlyForecast(value: [WeatherByHour], city: TerritoryInfo)
-    func addDailyForecast(value: WeatherByDay, city: TerritoryInfo)
-    func forecastError(_ status: Bool)
-}
-
-protocol Spinner {
-    func addSpinner()
-    func removeSpinner()
-}
-
-protocol Connection {
-    func checkConnection(_ status: Bool)
-}

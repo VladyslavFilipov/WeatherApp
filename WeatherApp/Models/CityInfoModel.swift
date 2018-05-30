@@ -8,13 +8,13 @@
 
 import Foundation
 
-class CityInfo : Forecast {
+class CityInfo {
   
     var locationDelegate: Territory?
     var forecastDelegate: Forecast?
-    var error = Bool() {
+    var error: ErrorType = .none {
         didSet {
-            if self.error { self.locationDelegate?.territoryError(self.error) } } }
+            if self.error == .territory { self.locationDelegate?.territoryError(true) } } }
     
     let hourly = HourlyWeather()
     let daily = DailyWeather()
@@ -24,29 +24,17 @@ class CityInfo : Forecast {
         daily.forecastDelegate = self
         let cityURLString = "https://dataservice.accuweather.com/locations/v1/cities/search?apikey=\(apiKey)&q=\(city)"
         guard let cityURL = URL(string: cityURLString) else { return }
-        Session.parseJSON(with: cityURL, type: [City].self) { city in
-            guard let city = city else { self.error = true; return }
+        Session.parseJSONWithAlamofire(with: cityURL, type: [City].self) { city in
+            guard let city = city else { self.error = .territory; return }
             if city != [City]() {
                 let territory = TerritoryInfo(name: city[0].name, key: city[0].key)
                 self.hourly.parseJsonFromUrl(territory, apiKey)
                 self.daily.parseJsonFromUrl(territory, apiKey)
-                if !self.hourly.error && !self.daily.error {
+                if self.hourly.error == .none && self.daily.error == .none {
                     self.locationDelegate?.addTerritory(withNameAndKey: territory)
-                    self.error = false
+                    self.error = .none
                 }
-            } else { self.error = true }
+            } else { self.error = .territory }
         }
-    }
-    
-    func addHourlyForecast(value: [WeatherByHour], city: TerritoryInfo) {
-        if !error { forecastDelegate?.addHourlyForecast(value: value, city: city) }
-    }
-    
-    func addDailyForecast(value: WeatherByDay, city: TerritoryInfo) {
-        if !error { forecastDelegate?.addDailyForecast(value: value, city: city) }
-    }
-    
-    func forecastError(_ status: Bool) {
-        if !error { forecastDelegate?.forecastError(status) }
     }
 }
