@@ -11,24 +11,21 @@ import Foundation
 class DailyWeather {
     
     var forecastDelegate: Forecast?
-    var error = Bool() {
+    var error: ErrorType = .none {
         didSet {
-            if self.error { self.forecastDelegate?.forecastError(self.error) }
-        }
-    }
+            if self.error == .forecast { self.forecastDelegate?.forecastError(true) } } }
     
     func parseJsonFromUrl(_ city: TerritoryInfo, _ apiKey: String) {
-        self.error = false
+        self.error = .none
         let weatherByDayString = "https://dataservice.accuweather.com/forecasts/v1/daily/5day/\(city.key)?apikey=\(apiKey)&metric=true"
         guard let weatherByDayURL = URL(string: weatherByDayString) else { return }
-        URLSession.shared.dataTask(with: weatherByDayURL, completionHandler: {(data, response, error) -> Void in
-            guard let data = data else { return }
-            do {
-                let weather = try JSONDecoder().decode(WeatherByDay.self, from: data)
-                self.forecastDelegate?.addDailyForecast(value: weather, city: city)
-            } catch { print("Daily forecast getting error")
-                self.error = true
+        Session.parseJSONWithAlamofire(with: weatherByDayURL, type: WeatherByDay.self) { weather in
+            guard var weather = weather else { self.error = .forecast; return }
+            for index in 0..<weather.forecast.count {
+                weather.forecast[index].date = weather.forecast[index].date.getSeparated(by: "T", on: 0).getSeparated(by: "-", on: 2)
+                weather.forecast[index].day.phrase = weather.forecast[index].day.phrase.getAllPhrase(separatedBy: "w/").getAllPhrase(separatedBy: "t-")
             }
-        }).resume()
+            self.forecastDelegate?.addDailyForecast(value: weather, city: city)
+        }
     }
 }

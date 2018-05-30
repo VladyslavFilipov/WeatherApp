@@ -8,7 +8,7 @@
 
 import UIKit
 
-class WeatherViewController: UIViewController, UIScrollViewDelegate, Territory, Forecast {
+class WeatherViewController: UIViewController {
     
     @IBOutlet weak var cityLabel: UILabel!
     @IBOutlet weak var weatherLabel: UILabel!
@@ -25,6 +25,7 @@ class WeatherViewController: UIViewController, UIScrollViewDelegate, Territory, 
     
     var itemIndex = 0
     var apiKey = ""
+    var spinner = UIView()
     var refreshControl = UIRefreshControl()
     var territoryNameAndKey: TerritoryInfo?
     var weatherArrayByDay = [DailyForecast]()
@@ -35,6 +36,7 @@ class WeatherViewController: UIViewController, UIScrollViewDelegate, Territory, 
     let basic = Basic()
     
     override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         scrollView.delegate = self
         refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
         self.refreshControl.addTarget(self, action: #selector(refresh), for: UIControlEvents.valueChanged)
@@ -43,8 +45,7 @@ class WeatherViewController: UIViewController, UIScrollViewDelegate, Territory, 
         setupTodaysDate()
     }
     
-    private func setupMainInfo() {
-        imageView = getBackgroundImage()
+    func setupMainInfo() {
         backgroundView.insertSubview(imageView, at: 0)
         
         let weather = self.weatherArrayByHour[0]
@@ -88,65 +89,20 @@ class WeatherViewController: UIViewController, UIScrollViewDelegate, Territory, 
     @objc func refresh(sender: AnyObject) {
         location.locationDelegate = self
         location.forecastDelegate = self
+        location.spinnerDelegate = self
         location.apiKey = apiKey
     }
+}
+
+extension WeatherViewController : Spinner {
     
-    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        setupMainInfo()
-        refreshControl.endRefreshing()
+    func addSpinner() {
+        spinner = self.displaySpinner(onView: self.view)
+        view.addSubview(spinner)
     }
     
-    func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        let translation = scrollView.panGestureRecognizer.translation(in: scrollView.superview!)
-        if translation.y > 200 {
-            if !InternetConnection.isConnectedToNetwork() {
-                connectionDelegate?.checkConnection(InternetConnection.isConnectedToNetwork())
-                return
-            } else if !Geolocation.isEnabled() {
-                locationDelegate?.territoryError(!Geolocation.isEnabled())
-                return
-            }
-        }
-    }
-    
-    func getBackgroundImage () -> UIImageView {
-        let imageView = UIImageView(frame: view.bounds)
-        let phrase = weatherArrayByHour[0].phrase.components(separatedBy: "w/")
-        for weather in basic.weatherTypeArray {
-            if phrase[phrase.count - 1].containsIgnoringCase(find: weather) {
-                imageView.image = UIImage(named: weather)
-                break
-            }
-        }
-        return imageView
-    }
-    
-    func addTerritory(withNameAndKey value: TerritoryInfo) {  }
-    
-    func addLocation(withNameAndKey value: TerritoryInfo) {
-        if self.itemIndex == 0 { self.locationDelegate?.addLocation(withNameAndKey: value) }
-    }
-    
-    func addHourlyForecast(value: [WeatherByHour], city: TerritoryInfo) {
-        if weatherArrayByHour != value {
-            weatherArrayByHour = value
-            forecastDelegate?.addHourlyForecast(value: value, city: city)
-        }
-    }
-    
-    func addDailyForecast(value: WeatherByDay, city: TerritoryInfo) {
-        if weatherArrayByDay != value.forecast {
-            weatherArrayByDay = value.forecast
-            forecastDelegate?.addDailyForecast(value: value, city: city)
-        }
-    }
-    
-    func forecastError(_ status: Bool) {
-        forecastDelegate?.forecastError(status)
-    }
-    
-    func territoryError(_ status: Bool) {
-        locationDelegate?.territoryError(status)
+    func removeSpinner() {
+        self.removeSpinner(spinner: spinner)
     }
 }
 
