@@ -12,6 +12,7 @@ class CityInfo {
   
     var locationDelegate: Territory?
     var forecastDelegate: Forecast?
+    var spinnerDelegate: Spinner?
     var error: ErrorType = .none {
         didSet {
             if self.error == .territory { self.locationDelegate?.territoryError(true) } } }
@@ -19,17 +20,16 @@ class CityInfo {
     let hourly = HourlyWeather()
     let daily = DailyWeather()
     
-    func parseJsonFromUrl(_ city: String, _ apiKey: String) {
-        hourly.forecastDelegate = self
-        daily.forecastDelegate = self
-        let cityURLString = "https://dataservice.accuweather.com/locations/v1/cities/search?apikey=\(apiKey)&q=\(city)"
-        guard let cityURL = URL(string: cityURLString) else { return }
-        Session.parseJSONWithAlamofire(with: cityURL, type: [City].self) { city in
-            guard let city = city else { self.error = .territory; return }
-            if city != [City]() {
-                let territory = TerritoryInfo(name: city[0].name, key: city[0].key)
-                self.hourly.parseJsonFromUrl(territory, apiKey)
-                self.daily.parseJsonFromUrl(territory, apiKey)
+    func parseJsonFromUrl(_ city: String) {
+        let path = Basic().cityURL + "\(Basic().apiKey)&q=\(city)"
+        hourly.forecastDelegate = forecastDelegate
+        daily.forecastDelegate = forecastDelegate
+        JSONGetting(spinnerDelegate).getJSON(path, type: [City].self) { cities in
+            guard let cities = cities else { self.error = .territory; return }
+            if cities.count > 0 {
+                let territory = TerritoryInfo(name: cities[0].name, key: cities[0].key)
+                self.hourly.parseJsonFromUrl(territory)
+                self.daily.parseJsonFromUrl(territory)
                 if self.hourly.error == .none && self.daily.error == .none {
                     self.locationDelegate?.addTerritory(withNameAndKey: territory)
                     self.error = .none

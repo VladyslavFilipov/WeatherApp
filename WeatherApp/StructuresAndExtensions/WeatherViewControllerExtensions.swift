@@ -12,7 +12,7 @@ import UIKit
 extension WeatherViewController : UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        let count = weatherArrayByHour.count
+        let count = weatherByHourCollection.count
         return count
     }
 }
@@ -21,7 +21,7 @@ extension WeatherViewController : UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "weatherCell", for: indexPath) as? WeatherCollectionViewCell else { return UICollectionViewCell() }
-        let weather = self.weatherArrayByHour[indexPath.row]
+        let weather = self.weatherByHourCollection[indexPath.row]
         cell.timeLabel.text = weather.dateTime
         cell.weatherTypeLabel.text = weather.phrase
         cell.temperatureLabel.text = weather.temperature.text
@@ -33,7 +33,7 @@ extension WeatherViewController : UICollectionViewDataSource {
 extension WeatherViewController : UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let count = weatherArrayByDay.count
+        let count = weatherByDayCollection.count
         return count
     }
 }
@@ -42,7 +42,7 @@ extension WeatherViewController : UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "weatherCell") as? WeatherTableViewCell else { return UITableViewCell() }
-        let weather = self.weatherArrayByDay[indexPath.row]
+        let weather = self.weatherByDayCollection[indexPath.row]
         cell.timeLabel.text = weather.date
         cell.weatherTypeLabel.text = weather.day.phrase
         cell.temperatureLabel.text = weather.temperature.text
@@ -62,7 +62,7 @@ extension WeatherViewController : UIScrollViewDelegate {
         let translation = scrollView.panGestureRecognizer.translation(in: scrollView.superview!)
         if translation.y > 200 {
             if !InternetConnection.isConnectedToNetwork() {
-                connectionDelegate?.checkConnection(InternetConnection.isConnectedToNetwork())
+                connectionDelegate?.updateWithConnectionAvailability(false)
                 return
             } else if !Geolocation.isEnabled() {
                 locationDelegate?.locationError(true)
@@ -93,15 +93,15 @@ extension WeatherViewController : Territory {
 extension WeatherViewController : Forecast {
     
     func addHourlyForecast(value: [WeatherByHour], city: TerritoryInfo) {
-        if weatherArrayByHour != value {
-            weatherArrayByHour = value
+        if weatherByHourCollection != value {
+            weatherByHourCollection = value
             forecastDelegate?.addHourlyForecast(value: value, city: city)
         }
     }
     
     func addDailyForecast(value: WeatherByDay, city: TerritoryInfo) {
-        if weatherArrayByDay != value.forecast {
-            weatherArrayByDay = value.forecast
+        if weatherByDayCollection != value.forecast {
+            weatherByDayCollection = value.forecast
             forecastDelegate?.addDailyForecast(value: value, city: city)
         }
     }

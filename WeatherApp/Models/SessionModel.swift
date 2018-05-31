@@ -17,8 +17,8 @@ class Session {
             case .success:
                 guard let jsonData = response.data else { return }
                 do {
-                    let city = try JSONDecoder().decode(type.self, from: jsonData)
-                    completion (city)
+                    let JSON = try JSONDecoder().decode(type.self, from: jsonData)
+                    completion (JSON)
                 } catch { completion (nil) }
             case .failure:
                 completion (nil)

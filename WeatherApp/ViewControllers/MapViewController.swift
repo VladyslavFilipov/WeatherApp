@@ -12,21 +12,20 @@ import MapKit
 class MapViewController: UIViewController {
     
     @IBOutlet weak var mkMapView: MKMapView!
-    var territoryDelegate: Territory?
+    
+    var locationDelegate: Territory?
     var forecastDelegate: Forecast?
     var spinnerDelegate: Spinner?
     
     var location = Geolocation()
     var city = CityInfo()
     var imageView = UIImageView()
-    var apiKey = ""
     
     var annotation = MKPointAnnotation()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.insertSubview(imageView, at: 0)
-        annotation.title = "I chose it"
         mkMapView.delegate = self
         mkMapView.showsUserLocation = true
     }
@@ -34,13 +33,13 @@ class MapViewController: UIViewController {
     @IBAction func doneButtonTapped(_ sender: Any) {
         self.spinnerDelegate?.addSpinner()
         self.location.locationDelegate = self
-        self.location.forecastDelegate = self
-        self.city.forecastDelegate = self
+        self.location.forecastDelegate = forecastDelegate
+        self.location.spinnerDelegate = spinnerDelegate
         self.city.locationDelegate = self
-        self.location.apiKey = apiKey
+        self.city.forecastDelegate = forecastDelegate
+        self.city.spinnerDelegate = spinnerDelegate
         location.parseJSON(annotation.coordinate)
         self.dismiss(animated: true, completion: nil)
-        self.spinnerDelegate?.removeSpinner()
     }
     
     @IBAction func cancelButtonTapped(_ sender: Any) {

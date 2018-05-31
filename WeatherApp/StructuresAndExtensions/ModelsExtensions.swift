@@ -20,41 +20,11 @@ extension Geolocation : CLLocationManagerDelegate {
     }
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        spinnerDelegate?.addSpinner()
         userLocation = locations[0] as CLLocation
-        daily.forecastDelegate = self
-        hourly.forecastDelegate = self
+        daily.forecastDelegate = forecastDelegate
+        hourly.forecastDelegate = forecastDelegate
         parseJSON(userLocation?.coordinate)
         self.locationManager.stopUpdatingLocation()
     }
 }
 
-extension Geolocation : Forecast {
-    
-    func addHourlyForecast(value: [WeatherByHour], city: TerritoryInfo) {
-        if error == .none { forecastDelegate?.addHourlyForecast(value: value, city: city) }
-    }
-    
-    func addDailyForecast(value: WeatherByDay, city: TerritoryInfo) {
-        if error == .none { forecastDelegate?.addDailyForecast(value: value, city: city) }
-    }
-    
-    func forecastError(_ status: Bool) {
-        if error == .none { forecastDelegate?.forecastError(status) }
-    }
-}
-
-extension CityInfo : Forecast {
-    
-    func addHourlyForecast(value: [WeatherByHour], city: TerritoryInfo) {
-        if error == .none { forecastDelegate?.addHourlyForecast(value: value, city: city) }
-    }
-    
-    func addDailyForecast(value: WeatherByDay, city: TerritoryInfo) {
-        if error == .none { forecastDelegate?.addDailyForecast(value: value, city: city) }
-    }
-    
-    func forecastError(_ status: Bool) {
-        if error == .none { forecastDelegate?.forecastError(status) }
-    }
-}

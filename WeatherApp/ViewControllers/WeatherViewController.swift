@@ -24,12 +24,11 @@ class WeatherViewController: UIViewController {
     var connectionDelegate: Connection?
     
     var itemIndex = 0
-    var apiKey = ""
     var spinner = UIView()
     var refreshControl = UIRefreshControl()
     var territoryNameAndKey: TerritoryInfo?
-    var weatherArrayByDay = [DailyForecast]()
-    var weatherArrayByHour = [WeatherByHour]()
+    var weatherByDayCollection = [DailyForecast]()
+    var weatherByHourCollection = [WeatherByHour]()
     var imageView = UIImageView()
     
     let location = Geolocation()
@@ -41,6 +40,7 @@ class WeatherViewController: UIViewController {
         refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
         self.refreshControl.addTarget(self, action: #selector(refresh), for: UIControlEvents.valueChanged)
         scrollView.refreshControl = refreshControl
+        imageView = getBackgroundImage()
         setupMainInfo()
         setupTodaysDate()
     }
@@ -48,7 +48,7 @@ class WeatherViewController: UIViewController {
     func setupMainInfo() {
         backgroundView.insertSubview(imageView, at: 0)
         
-        let weather = self.weatherArrayByHour[0]
+        let weather = self.weatherByHourCollection[0]
         let image = imageView.image
         
         switch image {
@@ -62,7 +62,7 @@ class WeatherViewController: UIViewController {
         
         self.cityLabel.text = self.territoryNameAndKey?.name
         self.temperatureLabel.text = "\(weather.temperature.value) in \(weather.temperature.unit)"
-        self.weatherLabel.text = weatherArrayByHour[0].phrase.getAllPhrase(separatedBy: "w/").getAllPhrase(separatedBy: "t-")
+        self.weatherLabel.text = weatherByHourCollection[0].phrase.getAllPhrase(separatedBy: "w/").getAllPhrase(separatedBy: "t-")
     }
     
     func setupMainLabelsBackground(_ color: UIColor) {
@@ -90,7 +90,18 @@ class WeatherViewController: UIViewController {
         location.locationDelegate = self
         location.forecastDelegate = self
         location.spinnerDelegate = self
-        location.apiKey = apiKey
+    }
+    
+    private func getBackgroundImage () -> UIImageView {
+        let imageView = UIImageView(frame: view.bounds)
+        let phrase = weatherByHourCollection[0].phrase.components(separatedBy: "w/")
+        for weather in WeatherPictures.allValues {
+            if phrase[phrase.count - 1].containsIgnoringCase(find: weather.rawValue) {
+                imageView.image = weather.image
+                break
+            }
+        }
+        return imageView
     }
 }
 

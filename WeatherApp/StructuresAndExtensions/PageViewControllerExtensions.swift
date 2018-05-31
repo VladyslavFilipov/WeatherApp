@@ -17,7 +17,7 @@ extension PageViewController : UIPageViewControllerDataSource {
     }
     
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
-        guard let weatherVC = viewController as? WeatherViewController, weatherVC.itemIndex + 1 < territoryArray.count  else { return nil }
+        guard let weatherVC = viewController as? WeatherViewController, weatherVC.itemIndex + 1 < territories.count  else { return nil }
         return getWeatherViewController(withIndex: weatherVC.itemIndex + 1)
     }
 }
@@ -41,12 +41,12 @@ extension PageViewController : UIPageViewControllerDelegate {
 extension PageViewController : Territory {
     
     func addLocation(withNameAndKey value: TerritoryInfo) {
-        if territoryArray.count == 0 { territoryArray.append(value) }
-        else { territoryArray[0] = value }
+        if territories.count == 0 { territories.append(value) }
+        else { territories[0] = value }
     }
     
     func addTerritory(withNameAndKey value: TerritoryInfo) {
-        if !territoryArray.contains(value) { territoryArray.append(value) }
+        if !territories.contains(value) { territories.append(value) }
     }
     
     func territoryError(_ status: Bool) {
@@ -70,13 +70,13 @@ extension PageViewController : Territory {
 extension PageViewController : Forecast {
     
     func addHourlyForecast(value: [WeatherByHour], city: TerritoryInfo) {
-        guard let index = territoryArray.index(of: city) else { return }
+        guard let index = territories.index(of: city) else { return }
         if index == weather.byHour.count { weather.byHour.append(value) }
         else { weather.byHour[index] = value }
     }
     
     func addDailyForecast(value: WeatherByDay, city: TerritoryInfo) {
-        guard let index = territoryArray.index(of: city) else { return }
+        guard let index = territories.index(of: city) else { return }
         if index == weather.byDay.count { weather.byDay.append(value) }
         else { weather.byDay[index] = value }
     }
@@ -104,7 +104,7 @@ extension PageViewController : Spinner {
 
 extension PageViewController : Connection {
     
-    func checkConnection(_ status: Bool) {
+    func updateWithConnectionAvailability(_ status: Bool) {
         DispatchQueue.main.async {
             self.connectionTroublesLabel.text = "Internet connection troubles"
             self.performingError(status)

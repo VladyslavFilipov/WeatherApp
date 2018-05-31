@@ -41,7 +41,7 @@ extension String {
         return phrase
     }
     
-    func getSeparated(by string: String,on position: Int) -> String {
+    func getSeparated(by string: String, on position: Int) -> String {
         let phrase = self.components(separatedBy: string)[position]
         return phrase
     }
@@ -71,7 +71,7 @@ extension UIViewController {
         return spinnerView
     }
     
-    func removeSpinner(spinner :UIView) {
+    func removeSpinner(spinner : UIView) {
         DispatchQueue.main.async {
             spinner.removeFromSuperview()
         }
@@ -113,5 +113,13 @@ extension EnumCollection {
     
     public static var allValues: [Self] {
         return Array(self.cases())
+    }
+}
+
+extension Array {
+    mutating func forEach(body: (inout Element) throws -> Void) rethrows {
+        for index in self.indices {
+            try body(&self[index])
+        }
     }
 }

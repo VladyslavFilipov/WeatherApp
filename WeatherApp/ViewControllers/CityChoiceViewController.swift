@@ -18,7 +18,6 @@ class CityChoiceViewController: UIViewController {
     var city = CityInfo()
     
     var imageView = UIImageView()
-    var apiKey = ""
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -26,15 +25,14 @@ class CityChoiceViewController: UIViewController {
     }
 
     @IBAction func doneButtonPressed(_ sender: Any) {
-        self.spinnerDelegate?.addSpinner()
         guard var city = cityTextField.text else { return }
         city = city.getOnlySymbols(separatedBy: " ")
-        self.city.locationDelegate = self
-        self.city.forecastDelegate = self
+        self.city.locationDelegate = territoryDelegate
+        self.city.forecastDelegate = forecastDelegate
+        self.city.spinnerDelegate = spinnerDelegate
         if city != "" {
-            self.city.parseJsonFromUrl(city, apiKey)
+            self.city.parseJsonFromUrl(city)
             self.dismiss(animated: true, completion: nil)
-            self.spinnerDelegate?.removeSpinner()
         }
     }
     

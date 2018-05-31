@@ -24,33 +24,19 @@ extension MapViewController : MKMapViewDelegate {
 extension MapViewController : Territory {
     
     func addTerritory(withNameAndKey value: TerritoryInfo) {
-        territoryDelegate?.addTerritory(withNameAndKey: value)
+        locationDelegate?.addTerritory(withNameAndKey: value)
     }
     
     func addLocation(withNameAndKey value: TerritoryInfo) {
-        self.city.parseJsonFromUrl(value.name, apiKey)
+        self.city.parseJsonFromUrl(value.name)
     }
     
     func territoryError(_ status: Bool) {
-        territoryDelegate?.territoryError(status)
+        locationDelegate?.territoryError(status)
     }
     
     func locationError(_ status: Bool) {
-        territoryDelegate?.locationError(status)
-    }
-}
-
-extension MapViewController : Forecast {
-    
-    func addHourlyForecast(value: [WeatherByHour], city: TerritoryInfo) {
-        forecastDelegate?.addHourlyForecast(value: value, city: city)
-    }
-    
-    func addDailyForecast(value: WeatherByDay, city: TerritoryInfo) {
-        forecastDelegate?.addDailyForecast(value: value, city: city)
-    }
-    
-    func forecastError(_ status: Bool) {
-        forecastDelegate?.forecastError(status)
+        print(status)
+        locationDelegate?.locationError(status)
     }
 }

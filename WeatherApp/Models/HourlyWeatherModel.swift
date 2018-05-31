@@ -15,19 +15,19 @@ class HourlyWeather {
         didSet {
             if self.error == .forecast { self.forecastDelegate?.forecastError(true) } } }
     
-    func parseJsonFromUrl(_ city: TerritoryInfo, _ apiKey: String) {
-        let weatherByHourString = "https://dataservice.accuweather.com/forecasts/v1/hourly/12hour/\(city.key)?apikey=\(apiKey)&metric=true"
-        guard let weatherByHourURL = URL(string: weatherByHourString) else { return }
+    func parseJsonFromUrl(_ city: TerritoryInfo) {
+        let path = Basic().hourlyURL + "\(city.key)?apikey=\(Basic().apiKey)&metric=true"
+        guard let weatherByHourURL = URL(string: path) else { return }
         Session.parseJSONWithAlamofire(with: weatherByHourURL, type: [WeatherByHour].self) { weather in
             guard var weather = weather else { self.error = .forecast; return }
-            if weather != [WeatherByHour]() {
+            if weather.count > 0 {
                 self.error = .none
-                for index in 0..<weather.count {
+                weather.forEach {
                     var separator = ""
-                    if weather[index].dateTime.contains("+") { separator = "+" }
-                    else if weather[index].dateTime.contains("-") { separator = "-" }
-                    weather[index].dateTime = weather[index].dateTime.getSeparated(by: "T", on: 1).getSeparated(by: separator, on: 0)
-                    weather[index].phrase = weather[index].phrase.getAllPhrase(separatedBy: "w/").getAllPhrase(separatedBy: "t-")
+                    if $0.dateTime.contains("+") { separator = "+" }
+                    else if $0.dateTime.contains("-") { separator = "-" }
+                    $0.dateTime = $0.dateTime.getSeparated(by: "T", on: 1).getSeparated(by: separator, on: 0)
+                    $0.phrase = $0.phrase.getAllPhrase(separatedBy: "w/").getAllPhrase(separatedBy: "t-")
                 }
                 self.forecastDelegate?.addHourlyForecast(value: weather, city: city)
             } else { self.error = .forecast }

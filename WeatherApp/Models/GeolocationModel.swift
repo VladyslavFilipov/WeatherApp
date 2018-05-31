@@ -11,7 +11,6 @@ import CoreLocation
 
 class Geolocation : CLLocationManager {
     
-    var apiKey = ""
     var locationDelegate: Territory?
     var forecastDelegate: Forecast?
     var spinnerDelegate: Spinner?
@@ -40,17 +39,15 @@ class Geolocation : CLLocationManager {
     
     func parseJSON(_ coordinates: CLLocationCoordinate2D?) {
         guard let coordinate = coordinates else { return }
-        let city = "https://dataservice.accuweather.com/locations/v1/cities/geoposition/search?apikey=\(apiKey)&q=\(coordinate.latitude)%2C\(coordinate.longitude)"
-        guard let cityURL = URL(string: city) else { return }
-        Session.parseJSONWithAlamofire(with: cityURL, type: City.self) { city in
-            guard let city = city else { self.error = .location; return }
-            let territory = TerritoryInfo(name: city.name, key: city.key)
-            self.daily.parseJsonFromUrl(territory, self.apiKey)
-            self.hourly.parseJsonFromUrl(territory, self.apiKey)
+        let path = Basic().locationURL + "\(Basic().apiKey)&q=\(coordinate.latitude)%2C\(coordinate.longitude)"
+        JSONGetting(spinnerDelegate).getJSON( path , type: City.self) { location in
+            guard let location = location else { self.error = .location; return }
+            let territory = TerritoryInfo(name: location.name, key: location.key)
+            self.daily.parseJsonFromUrl(territory)
+            self.hourly.parseJsonFromUrl(territory)
             self.locationDelegate?.addLocation(withNameAndKey: territory)
             self.error = .none
         }
-        self.spinnerDelegate?.removeSpinner()
     }
 }
 

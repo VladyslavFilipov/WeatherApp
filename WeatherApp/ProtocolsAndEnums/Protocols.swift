@@ -27,7 +27,7 @@ protocol Spinner {
 }
 
 protocol Connection {
-    func checkConnection(_ status: Bool)
+    func updateWithConnectionAvailability(_ status: Bool)
 }
 
 public protocol EnumCollection: Hashable {
