@@ -1,0 +1,14 @@
+//
+//  BasicModel.swift
+//  WeatherApp
+//
+//  Created by Vladislav Filipov on 23.05.2018.
+//  Copyright © 2018 Vladislav Filipov. All rights reserved.
+//
+
+import Foundation
+
+class Basic {
+    let apiKey = "iWAaXNeABh4uRTc6kXDUzKo0Hhbspaeu"
+}
+
