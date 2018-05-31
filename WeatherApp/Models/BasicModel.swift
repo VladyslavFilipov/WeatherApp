@@ -9,6 +9,6 @@
 import Foundation
 
 class Basic {
-    let apiKey = "5bfH5Q6Hy0ksXqo085F6XLl2IJ2GOWx6"
+    let apiKey = "iWAaXNeABh4uRTc6kXDUzKo0Hhbspaeu"
 }
 
