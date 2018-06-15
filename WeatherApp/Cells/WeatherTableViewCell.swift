@@ -13,5 +13,4 @@ class WeatherTableViewCell: UITableViewCell {
     @IBOutlet weak var timeLabel: UILabel!
     @IBOutlet weak var temperatureLabel: UILabel!
     @IBOutlet weak var weatherTypeLabel: UILabel!
-
 }

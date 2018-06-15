@@ -16,64 +16,93 @@ class WeatherViewController: UIViewController {
     @IBOutlet weak var dateLabel: UILabel!
     @IBOutlet weak var weatherByDayTableView: UITableView!
     @IBOutlet weak var weatherByHourCollectionView: UICollectionView!
+    @IBOutlet var backgroundView: UIView!
+    @IBOutlet weak var scrollView: UIScrollView!
     
-    let pageView = PageViewController()
+    var locationDelegate: Territory?
+    var forecastDelegate: Forecast?
+    var connectionDelegate: Connection?
     
     var itemIndex = 0
     var apiKey = ""
-    var territoryNameAndKey: (String, String) = ("", "")
+    var spinner = UIView()
+    var refreshControl = UIRefreshControl()
+    var territoryNameAndKey: TerritoryInfo?
+    var weatherArrayByDay = [DailyForecast]()
+    var weatherArrayByHour = [WeatherByHour]()
+    var imageView = UIImageView()
     
-    var weatherArrayByDay = [DailyForecast]() {
-        didSet { DispatchQueue.main.async {
-            self.weatherByDayTableView.reloadData() } }
-    }
-    
-    var weatherArrayByHour = [WeatherByHour]() {
-        didSet { DispatchQueue.main.async {
-            let weather = self.weatherArrayByHour[0]
-            self.temperatureLabel.text = "\(weather.temperature.value) in \(weather.temperature.unit)"
-            self.weatherLabel.text = weather.phrase
-            self.cityLabel.text = self.territoryNameAndKey.0
-            self.weatherByHourCollectionView.reloadData() } }
-    }
+    let location = Geolocation()
+    let basic = Basic()
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        scrollView.delegate = self
+        refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
+        self.refreshControl.addTarget(self, action: #selector(refresh), for: UIControlEvents.valueChanged)
+        scrollView.refreshControl = refreshControl
+        setupMainInfo()
+        setupTodaysDate()
+    }
+    
+    func setupMainInfo() {
+        backgroundView.insertSubview(imageView, at: 0)
+        
+        let weather = self.weatherArrayByHour[0]
+        let image = imageView.image
+        
+        switch image {
+        case UIImage(named: "hot"), UIImage(named: "clear"), UIImage(named: "storm"), UIImage(named: "rain"), UIImage(named: "shower"):
+            setupMainLabelsBackground(UIColor.white)
+            UIApplication.shared.statusBarStyle = .lightContent
+        default :
+            setupMainLabelsBackground(UIColor.black)
+            UIApplication.shared.statusBarStyle = .default
+        }
+        
+        self.cityLabel.text = self.territoryNameAndKey?.name
+        self.temperatureLabel.text = "\(weather.temperature.value) in \(weather.temperature.unit)"
+        self.weatherLabel.text = weatherArrayByHour[0].phrase.getAllPhrase(separatedBy: "w/").getAllPhrase(separatedBy: "t-")
+    }
+    
+    func setupMainLabelsBackground(_ color: UIColor) {
+        cityLabel.textColor = color
+        cityLabel.shadowColor = color.invert()
+        temperatureLabel.textColor = color
+        temperatureLabel.shadowColor = color.invert()
+        weatherLabel.textColor = color
+        weatherLabel.shadowColor = color.invert()
+        dateLabel.textColor = color
+        dateLabel.shadowColor = color.invert()
+        scrollView.refreshControl?.tintColor = color
+        scrollView.refreshControl?.attributedTitle = NSAttributedString(string: "Pull to refresh", attributes: [NSAttributedStringKey.foregroundColor: color])
+    }
+    
+    private func setupTodaysDate() {
         let date = Date()
         let formatter = DateFormatter()
         formatter.dateFormat = "dd.MM.yyyy"
         let result = formatter.string(from: date)
-        dateLabel.text = result
-        getJsonFromUrl()
+        self.dateLabel.text = result
     }
     
-    func getJsonFromUrl() {
-            let weatherByHourString = "https://dataservice.accuweather.com/forecasts/v1/hourly/12hour/\(self.territoryNameAndKey.1)?apikey=\(self.apiKey)&metric=true"
-            guard let weatherByHourURL = URL(string: weatherByHourString) else { return }
-            URLSession.shared.dataTask(with: weatherByHourURL, completionHandler: {(data, response, error) -> Void in
-                guard let data = data else { return }
-                do {
-                    let weather = try JSONDecoder().decode([WeatherByHour].self, from: data)
-                    self.weatherArrayByHour = weather
-                } catch { print("It`s an error here") }
-            }).resume()
-            let weatherByDayString = "https://dataservice.accuweather.com/forecasts/v1/daily/5day/\(self.territoryNameAndKey.1)?apikey=\(self.apiKey)&metric=true"
-            guard let weatherByDayURL = URL(string: weatherByDayString) else { return }
-            URLSession.shared.dataTask(with: weatherByDayURL, completionHandler: {(data, response, error) -> Void in
-                guard let data = data else { return }
-                do {
-                    let weather = try JSONDecoder().decode(WeatherByDay.self, from: data)
-                    self.weatherArrayByDay = weather.forecast
-                } catch { print("It`s an error here") }
-            }).resume()
-    }
-    
-    func parseJSONasArray(_ data: Data, _ key: String) -> [Any]? {
-        do { if let json = try JSONSerialization.jsonObject(with: data) as? [Any] { print(json); return json }
-        else if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] { return json[key] as? [Any] } }
-        catch { print("Error"); return nil }
-        return nil
+    @objc func refresh(sender: AnyObject) {
+        location.locationDelegate = self
+        location.forecastDelegate = self
+        location.spinnerDelegate = self
+        location.apiKey = apiKey
     }
 }
 
+extension WeatherViewController : Spinner {
+    
+    func addSpinner() {
+        spinner = self.displaySpinner(onView: self.view)
+        view.addSubview(spinner)
+    }
+    
+    func removeSpinner() {
+        self.removeSpinner(spinner: spinner)
+    }
+}
 
